@@ -1,0 +1,92 @@
+Static Network Scanner Binaries
+Fully static builds of Nmap and Masscan for x86_64 Linux systems with zero runtime dependencies. These binaries run on any Linux system with kernel 2.6.32 or newer without requiring library installations.
+Contents
+ToolVersionStripped SizeCompressed SizeFeaturesNmap7.607.8 MB3.1 MBLua scripting, OpenSSL, libssh2, pcre, libpcap, IPv6Masscan1.3.91.4 MB607 KBHigh-speed port scanner
+Why Static Binaries?
+Static binaries are useful in environments where:
+
+You cannot install dependencies (restricted/embedded systems)
+Target systems have missing or incompatible libraries
+You need guaranteed portability across different Linux distributions
+Working in containers, Cisco network devices (GuestShell), or minimal Linux installations
+
+These binaries have zero external dependencies - everything is compiled into the executable.
+System Requirements
+
+x86_64 Linux system
+Kernel 2.6.32 or newer (virtually all modern Linux distributions)
+Root privileges or CAP_NET_RAW capability for raw socket operations (required for most scan types)
+
+Installation
+Download the appropriate archive and extract:
+bash# Download from releases
+wget https://github.com/YOUR_USERNAME/REPO_NAME/releases/download/VERSION/nmap-7.60-static-x86_64.tar.gz
+wget https://github.com/YOUR_USERNAME/REPO_NAME/releases/download/VERSION/masscan-static-x86_64.tar.gz
+
+# Extract
+tar xzf nmap-7.60-static-x86_64.tar.gz
+tar xzf masscan-static-x86_64.tar.gz
+
+# Optional: Move to system PATH
+sudo mv nmap masscan /usr/local/bin/
+
+# Make executable (if needed)
+chmod +x nmap masscan
+Verification
+Confirm these are truly static binaries with no dependencies:
+bash$ ldd nmap
+    not a dynamic executable
+
+$ ldd masscan
+    not a dynamic executable
+
+$ file nmap
+nmap: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, stripped
+
+$ file masscan
+masscan: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, stripped
+Usage Examples
+Nmap
+bash# Basic ping scan
+./nmap -sn 192.168.1.0/24
+
+# Port scan with version detection
+sudo ./nmap -sV -p- 192.168.1.1
+
+# Script scan
+sudo ./nmap -sC -sV target.com
+
+# Check version
+./nmap --version
+Masscan
+bash# Fast port scan
+sudo ./masscan -p80,443,8080 192.168.1.0/24 --rate=10000
+
+# Scan entire TCP port range
+sudo ./masscan -p0-65535 10.0.0.0/8 --rate=100000
+
+# Output to file
+sudo ./masscan -p80,443 192.168.1.0/24 --rate=1000 -oG results.txt
+
+# Check version
+./masscan --version
+Important Notes
+Root Privileges
+Both tools require root privileges (or CAP_NET_RAW capability) for most scan types that use raw sockets. Use sudo when running scans.
+glibc NSS Warnings
+You may see warnings like:
+warning: Using 'getaddrinfo' in statically linked applications requires 
+at runtime the shared libraries from the glibc version used for linking
+This is normal and expected for static binaries. These warnings refer to Name Service Switch (NSS) plugins that glibc may attempt to load dynamically for DNS resolution. The tools will still function correctly in most cases.
+Testing
+Always test in a controlled environment first. Verify the binaries work in your specific target environment before deploying to production systems.
+Build Information
+These binaries were built on CentOS 7 to ensure compatibility with older Linux systems. They include:
+Nmap Dependencies (all statically linked)
+
+OpenSSL 1.0.2u (built without Kerberos)
+libpcap 1.5.3
+libssh2 1.8.0
+PCRE 8.32
+zlib 1.2.8
+Lua 5.3.3
